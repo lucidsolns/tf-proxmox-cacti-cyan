@@ -1,0 +1,37 @@
+---
+version: "3"
+services:
+  db:
+    image: mariadb:lts
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: example
+      MARIADB_USER: cacti
+      MARIADB_PASSWORD: cacti
+      MARIADB_DATABASE: cacti
+    volumes:
+      - /srv/db:/var/lib/mysql
+
+  # https://hub.docker.com/r/smcline06/cacti
+  cacti:
+    image: smcline06/cacti:1.2.17
+    container_name: cacti
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_NAME: cacti
+      DB_USER: cacti
+      DB_PASS: cacti
+      DB_ROOT_PASS: example
+      INITIALIZE_DB: 1
+      TZ: Pacific/Auckland
+    ports:
+      - "80:80"
+    volumes:
+      - cacti_snmp_config:/etc/snmp
+
+volumes:
+  cacti_db_data:
+  cacti_snmp_config:

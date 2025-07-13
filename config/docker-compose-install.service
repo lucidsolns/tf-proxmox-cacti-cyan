@@ -1,0 +1,28 @@
+# 'docker compose' (v2) is not part of flatcar, so add it. This needs to be done
+# after the network comes up, so do it via a systemd unit rather than a 'file' entry.
+#
+# WARNING: this doesn't install the cli plugin correctly, as it would need to be
+# installed on '/usr' which is read-only. So docker compose must be used via
+# `docker-compose` (i.e. with the hyphen).
+#
+# see
+#  - https://github.com/flatcar/Flatcar/issues/894#issuecomment-1318414513
+#  - https://github.com/docker/compose
+
+[Unit]
+Wants=network-online.target
+After=network.target network-online.target
+ConditionFileIsExecutable=!/opt/bin/docker-compose
+
+[Service]
+Environment=SOURCE_URL=https://github.com/docker/compose/releases/download/v2.38.2/docker-compose-linux-x86_64
+Environment=VERIFICATION=486b3ffc0f806ca2efbc430cef89955386011662f0c76bad17c103d059cfa9cf
+Type=oneshot
+RemainAfterExit=True
+ExecStart=/usr/bin/curl --location --no-progress-meter --output /opt/bin/docker-compose~ "${SOURCE_URL}"
+ExecStart=/bin/sh -c "echo \"${VERIFICATION} /opt/bin/docker-compose~\" | /usr/bin/sha256sum --check --status"
+ExecStart=/usr/bin/chmod +x /opt/bin/docker-compose~
+ExecStart=/usr/bin/mv /opt/bin/docker-compose~ /opt/bin/docker-compose
+
+[Install]
+WantedBy=multi-user.target

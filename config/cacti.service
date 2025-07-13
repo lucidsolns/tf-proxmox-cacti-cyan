@@ -1,0 +1,9 @@
+[Unit]
+After=docker.service docker-compose-install.service
+Requires=docker.service docker-compose-install.service
+
+[Service]
+ExecStart=/opt/bin/docker-compose -f /etc/docker-compose.yaml up
+
+[Install]
+WantedBy=multi-user.target

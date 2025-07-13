@@ -1,0 +1,107 @@
+# k3s node configuration for the Flatcar VM, with support for terraform template substitution.
+#
+# see
+#   - https://coreos.github.io/butane/config-flatcar-v1_1/
+#   - https://coreos.github.io/butane/config-flatcar-v1_0/
+#   - https://coreos.github.io/butane/
+#
+version: 1.1.0
+variant: flatcar
+
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFkyaM9D4TtCOSdIR8JvH5DCt0UHbfPGx7VlSJrP593N me-ed25519
+
+    # user cacti for ownership of files in the config/data directories, to match the docker compose
+    - name: cacti
+      uid: 1000
+      primary_group: cacti
+      no_create_home: true
+    - name: mysql
+      uid: 999
+      primary_group: mysql
+      no_create_home: true
+  groups:
+    - name: cacti
+      gid: 1000
+    - name: mysql
+      gid: 999
+
+storage:
+  disks:
+
+    # Partition the sparse ZFS zvol with a GPT, with a single partition. This will be used for
+    # the database, and should not be overwritten.
+    #
+    # The device 'virtio1' maps to the second virtual device `/dev/vdb`
+    - device: /dev/vdb
+      wipe_table: false
+      partitions:
+        - label: srv
+          number: 1
+          wipe_partition_entry: false
+          type_guid: 3B8F8425-20E0-4F3B-907F-1A25A76F98E8 # see https://en.wikipedia.org/wiki/GUID_Partition_Table
+
+  filesystems:
+    # In theory, this partition could be auto-mounted, but it is not on the same physical disk
+    # as the EFI system partition.
+    - device: /dev/disk/by-partlabel/srv
+      path: /srv
+      format: ext4
+      wipe_filesystem: false
+      label: srv
+      with_mount_unit: true
+
+  files:
+    - path: /etc/hostname
+      mode: 0644
+      contents:
+        inline: ${vm_name}
+
+    - path: /etc/docker-compose.yaml
+      contents:
+        local: docker-compose.yaml
+
+
+    - path: /etc/systemd/network/10-eth0.network
+      contents:
+        local: eth0.network
+
+
+    # Locks down the ssh daemon.
+    #
+    # see:
+    #  - https://www.flatcar.org/docs/latest/setup/security/customizing-sshd/
+    - path: /etc/ssh/sshd_config
+      overwrite: true
+      mode: 0600
+      contents:
+        local: sshd_config
+
+  directories:
+    - path: /srv/cacti
+      user:
+        name: cacti
+      group:
+        name: cacti
+    - path: /srv/db
+      user:
+        name: cacti
+      group:
+        name: cacti
+
+
+systemd:
+  units:
+
+    - name: docker-compose-install.service
+      enabled: true
+      contents_local: docker-compose-install.service
+
+
+      # cacti
+    - name: cacti.service
+      enabled: true
+      contents_local: cacti.service

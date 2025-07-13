@@ -1,0 +1,19 @@
+[Match]
+Name=eth0
+
+[Link]
+MTUBytes=9000
+
+[Network]
+Address=10.20.11.99/24
+Gateway=10.20.11.1
+IPv6AcceptRA=yes
+
+DNS=fd0c:898b:471c:2::5
+DNS=10.20.2.5
+DNS=10.20.0.1
+
+[IPv6AcceptRA]
+Token=static:::99
+
+NTP=0.ntp.lucidsolutions.co.nz 1.ntp.lucidsolutions.co.nz 2.ntp.lucidsolutions.co.nz
