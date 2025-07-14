@@ -84,11 +84,6 @@ resource "proxmox_virtual_environment_vm" "flatcar_vm" {
     mtu = 1 // use bridge MTU of 9k
   }
 
-  # initialization {
-  #   datastore_id      = var.storage_root
-  #   # user_data_file_id = proxmox_virtual_environment_file.flatcar_butane.id
-  # }
-
   // Directly set the KVM/Qemu firmware configuration. Don't use cloud-init, provide
   // the butane via Qemu firmware configuration as a file in a snippet.
   //
