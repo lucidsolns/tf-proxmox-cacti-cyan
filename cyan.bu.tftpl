@@ -81,17 +81,28 @@ storage:
         local: sshd_config
 
   directories:
-    - path: /srv/cacti
+    - path: /srv/cacti-data
       user:
         name: cacti
       group:
         name: cacti
-    - path: /srv/db
+    - path: /srv/cacti-spine
+      user:
+        name: cacti
+      group:
+        name: cacti
+    - path: /srv/cacti-backups
       user:
         name: cacti
       group:
         name: cacti
 
+
+    - path: /srv/db
+      user:
+        name: mysql
+      group:
+        name: mysql
 
 systemd:
   units:

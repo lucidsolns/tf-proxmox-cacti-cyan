@@ -15,8 +15,8 @@ resource "proxmox_virtual_environment_vm" "flatcar_vm" {
   ]
 
   memory {
-    dedicated = 512
-    floating  = 2048
+    dedicated = 1500
+    floating  = 512
   }
 
   agent {

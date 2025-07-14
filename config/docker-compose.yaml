@@ -1,21 +1,53 @@
 ---
 version: "3"
 services:
+  #  Standard mariadb (mysql) - use the long term support version
+  #
   db:
     image: mariadb:lts
     restart: always
+    hostname: cacti-db
     environment:
       MARIADB_ROOT_PASSWORD: example
       MARIADB_USER: cacti
       MARIADB_PASSWORD: cacti
       MARIADB_DATABASE: cacti
+      TZ: Pacific/Auckland
+    ports:
+      - "3306:3306"
     volumes:
       - /srv/db:/var/lib/mysql
+    command:
+      # Note: the database device is on a ZFS ZVOL, so double write is off
+      - mariadbd
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max_connections=200
+      - --max_heap_table_size=128M
+      - --max_allowed_packet=32M
+      - --tmp_table_size=128M
+      - --join_buffer_size=128M
+      - --innodb=FORCE
+      - --default-storage-engine=InnoDB
+      - --innodb_buffer_pool_size=1G
+      - --innodb_doublewrite=OFF
+      - --innodb_flush_log_at_timeout=3
+      - --innodb_read_io_threads=32
+      - --innodb_write_io_threads=16
+      - --innodb_buffer_pool_instances=9
+      - --innodb_file_format=Barracuda
+      - --innodb_large_prefix=1
+      - --innodb_io_capacity=5000
+      - --innodb_io_capacity_max=10000
 
-  # https://hub.docker.com/r/smcline06/cacti
+  #  A single Cacti container
+  #
+  # - https://hub.docker.com/r/smcline06/cacti
+  # - https://github.com/scline/docker-cacti/blob/master/docker-compose/README.md
   cacti:
     image: smcline06/cacti:1.2.17
     container_name: cacti
+    hostname: cacti
     restart: unless-stopped
     depends_on:
       - db
@@ -30,8 +62,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - cacti_snmp_config:/etc/snmp
+      - /srv/cacti-data:/cacti
+      - /srv/cacti-spine:/spine
+      - /srv/cacti-backups:/backups
 
-volumes:
-  cacti_db_data:
-  cacti_snmp_config:

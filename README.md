@@ -1,6 +1,6 @@
 # A Cacti instance running on Proxmox
 
-This repository provisions:
+This repository provisions a Cacti instance:
   - using Terraform
   - a Proxmox virtual machine
   - running Flatcar Linux
@@ -13,8 +13,9 @@ This is a small standalone instance intended to have limited scalability for
 monitoring local network/machine instances.
 
 **Notes:** 
- - Manual configuration of the Cacti instance is not described here.
- - Terraform state is stored locally
+ - Manual configuration of the Cacti instance is not described here (the initial username/password is admin/admin)
+ - Terraform (`terraform.tfstate`) state is stored locally
+ - An external http reverse proxy provides TLS offload/certificates 
 
 # Terraform Notes
 
@@ -29,6 +30,8 @@ Provisioning this virtual machine with `bpg/proxmox` over `Telmate/proxmox` mean
 - persistent disk images can be created (perhaps this could also be done with Telmate/proxmox)
 - no template VM is required, the Flatcar Linux image is used directly
 - the setup for disks is cleaner and simpler
+- with both Proxmox, Flatcar Linux and bpg/Proxmox having first class support for virtiofs, this
+  becomes a viable option for some lower performance filesystem
 
 # Known issues
 
