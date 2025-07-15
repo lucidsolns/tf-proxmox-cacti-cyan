@@ -9,9 +9,9 @@ resource "proxmox_virtual_environment_vm" "flatcar_vm" {
   node_name   = var.target_node
 
   tags = [
+    "cacti",
     "flatcar",
-    "tf",
-    "test"
+    "ops",
   ]
 
   memory {

@@ -5,7 +5,7 @@ Name=eth0
 MTUBytes=9000
 
 [Network]
-Address=10.20.11.99/24
+Address=10.20.11.2/24
 Gateway=10.20.11.1
 IPv6AcceptRA=yes
 
@@ -14,6 +14,6 @@ DNS=10.20.2.5
 DNS=10.20.0.1
 
 [IPv6AcceptRA]
-Token=static:::99
+Token=static:::2
 
 NTP=0.ntp.lucidsolutions.co.nz 1.ntp.lucidsolutions.co.nz 2.ntp.lucidsolutions.co.nz
