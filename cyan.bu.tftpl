@@ -42,7 +42,10 @@ storage:
         - label: srv
           number: 1
           wipe_partition_entry: false
-          type_guid: 3B8F8425-20E0-4F3B-907F-1A25A76F98E8 # see https://en.wikipedia.org/wiki/GUID_Partition_Table
+          # see:
+          #  - https://uapi-group.org/specifications/specs/discoverable_partitions_specification/
+          #  - https://en.wikipedia.org/wiki/GUID_Partition_Table
+          type_guid: 3B8F8425-20E0-4F3B-907F-1A25A76F98E8
 
   filesystems:
     # In theory, this partition could be auto-mounted, but it is not on the same physical disk
