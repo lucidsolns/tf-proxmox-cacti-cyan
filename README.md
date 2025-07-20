@@ -1,4 +1,4 @@
-# A Cacti instance running on Proxmox
+# [A Cacti instance running on Proxmox](https://github.com/lucidsolns/tf-proxmox-cacti-cyan/blob/main/README.md)
 
 This repository provisions a Cacti instance:
   - using Terraform
@@ -55,6 +55,7 @@ Provisioning this virtual machine with `bpg/proxmox` over `Telmate/proxmox` mean
  - https://github.com/flatcar/Flatcar
  - https://hub.docker.com/r/smcline06/cacti
  - https://github.com/flatcar/scripts/pull/2825
+ - https://github.com/flatcar/flatcar-terraform
 
 # Appendices
 
