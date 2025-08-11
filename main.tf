@@ -4,7 +4,7 @@
  */
 module "cacti" {
   source  = "lucidsolns/flatcar-vm/proxmox"
-  version = "1.0.4"
+  version = "1.0.6"
 
   vm_id          = var.vm_id
   vm_name        = var.vm_name
