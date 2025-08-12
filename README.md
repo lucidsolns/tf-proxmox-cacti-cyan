@@ -19,7 +19,9 @@ monitoring local network/machine instances.
 
 # Terraform Notes
 
-This module uses the BPG/Proxmox provider. Previously these terraform scripts have been using the
+This module uses the BPG/Proxmox provider in 
+a [flatcar module](https://github.com/lucidsolns/terraform-proxmox-flatcar-vm). 
+Previously these terraform scripts have been using the
 [module](https://github.com/lucidsolns/terraform-flatcar-ignition-proxmox).
 
 # Benefits
@@ -49,6 +51,7 @@ Provisioning this virtual machine with `bpg/proxmox` over `Telmate/proxmox` mean
 
 # Links
 
+ - https://github.com/lucidsolns/terraform-proxmox-flatcar-vm
  - https://registry.terraform.io/providers/bpg/proxmox/latest
  - https://www.cacti.net/ 
  - https://developer.hashicorp.com/terraform/install
