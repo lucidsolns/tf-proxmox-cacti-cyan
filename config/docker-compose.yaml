@@ -5,6 +5,7 @@ services:
   #
   db:
     image: mariadb:lts
+    container_name: db
     restart: always
     hostname: cacti-db
     environment:
