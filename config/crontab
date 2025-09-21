@@ -1,0 +1,16 @@
+# Crontab format:
+#   https://github.com/aptible/supercronic#crontab-format
+# ┌────────────── Second
+# │ ┌──────────── Minute
+# │ │ ┌────────── Hour
+# │ │ │ ┌──────── Day of month
+# │ │ │ │ ┌────── Month
+# │ │ │ │ │ ┌──── Day of week
+# │ │ │ │ │ │ ┌── Year
+# │ │ │ │ │ │ │ ┌ Command
+# ┴ ┴ ┴ ┴ ┴ ┴ ┴ ┴
+# * * * * * * * printf '%s\n' 'Hello world!'
+
+
+# Once a week on Sunday at 3am backup Cacti
+17 11 3 * * 0 * docker exec cacti ./backup.sh

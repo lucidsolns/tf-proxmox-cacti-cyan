@@ -31,6 +31,10 @@ module "cacti" {
 
   butane_conf         = "${path.module}/cyan.bu.tftpl"
   butane_snippet_path = "${path.module}/config"
+  butane_variables = {
+    DB_ROOT_PASSWORD  = random_password.db_root_password.result
+    DB_CACTI_PASSWORD = random_password.db_cacti_password.result
+  }
 
   storage_images = var.storage_images
   storage_root   = var.storage_root
@@ -47,6 +51,23 @@ module "cacti" {
       backup       = true
     }
   ]
+}
+
+
+/*
+  Generate a random password to be used for the 'owncloud' user for the db server
+*/
+resource "random_password" "db_cacti_password" {
+  length  = 32    # number of characters
+  special = false # include special chars
+}
+
+/*
+  Generate a random password to be used for the 'root' user for the db server
+*/
+resource "random_password" "db_root_password" {
+  length  = 32    # number of characters
+  special = false # include special chars
 }
 
 /*

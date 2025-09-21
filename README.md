@@ -49,6 +49,36 @@ Provisioning this virtual machine with `bpg/proxmox` over `Telmate/proxmox` mean
 4. The idea of having a second VM that never changes to hold a disk is a novel idea, but it
    is a workaround that needs a real/good solution.
 
+# Changing the MariaDB password
+
+From the FLatcar command line, get a shell inside the database container and run mariadb 
+command line as the root user. Enter the existing root password:
+```shell
+docker exec -it db bash
+mariadb -u root -p
+```
+
+Determine which passwords have been configured and which will be changed:
+```mysql
+SELECT user, host, plugin FROM mysql.user;
+```
+
+For each user being changed:
+```mysql
+ALTER USER 'myuser'@'localhost' IDENTIFIED BY 'MyNewPassword';
+FLUSH PRIVILEGES;
+```
+
+example:
+```mysql
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'MyNewPassword';
+ALTER USER 'root'@'%' IDENTIFIED BY 'MyNewPassword';
+ALTER USER 'cacti'@'%' IDENTIFIED BY 'MyNewPassword';
+```
+
+The password used by the Cacti container is stored in `/cacti/include/config.php` in
+the container, or `/srv/cacti-data/include/config.php` in the Flatcar docker host.
+
 # Links
 
  - https://github.com/lucidsolns/terraform-proxmox-flatcar-vm

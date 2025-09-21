@@ -1,23 +1,61 @@
 ---
-version: "3"
+name: cacti-monitoring
+
 services:
+  #  A single Cacti container
+  #
+  # see:
+  #   - https://hub.docker.com/r/smcline06/cacti
+  #   - https://github.com/scline/docker-cacti/blob/master/docker-compose/README.md
+  #   - https://github.com/scline/docker-cacti/blob/master/README.md
+  cacti:
+    image: smcline06/cacti:1.2.17
+    container_name: cacti
+    hostname: cacti
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_NAME: cacti
+      DB_USER: cacti
+      DB_PASS: ${DB_CACTI_PASSWORD}
+      DB_ROOT_PASS: ${DB_ROOT_PASSWORD}
+      INITIALIZE_DB: 1
+      TZ: Pacific/Auckland
+    ports:
+      - "80:80"
+    volumes:
+      - /srv/cacti-data:/cacti
+      - /srv/cacti-spine:/spine
+      - /srv/cacti-backups:/backups
+
+
   #  Standard mariadb (mysql) - use the long term support version
   #
+  # see:
+  # - https://hub.docker.com/_/mariadb
   db:
     image: mariadb:lts
     container_name: db
     restart: always
     hostname: cacti-db
     environment:
-      MARIADB_ROOT_PASSWORD: example
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MARIADB_USER: cacti
-      MARIADB_PASSWORD: cacti
+      MARIADB_PASSWORD: ${DB_CACTI_PASSWORD}
       MARIADB_DATABASE: cacti
       TZ: Pacific/Auckland
     ports:
       - "3306:3306"
     volumes:
       - /srv/db:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5    # How many consecutive failures before marking as unhealthy
+      start_period: 30s # Grace period for the container to start before health checks begin
     command:
       # Note: the database device is on a ZFS ZVOL, so double write is off
       - mariadbd
@@ -41,29 +79,22 @@ services:
       - --innodb_io_capacity=5000
       - --innodb_io_capacity_max=10000
 
-  #  A single Cacti container
+  # Run the cacti backup as a cron job
   #
-  # - https://hub.docker.com/r/smcline06/cacti
-  # - https://github.com/scline/docker-cacti/blob/master/docker-compose/README.md
-  cacti:
-    image: smcline06/cacti:1.2.17
-    container_name: cacti
-    hostname: cacti
+  # see:
+  #  - https://hub.docker.com/r/hectorm/supercronic
+  #  - https://github.com/aptible/supercronic
+  #  - https://github.com/hectorm/docker-supercronic
+  cron_job_runner:
+    image: hectorm/supercronic:latest
+    container_name: cron
     restart: unless-stopped
     depends_on:
-      - db
-    environment:
-      DB_HOST: db
-      DB_NAME: cacti
-      DB_USER: cacti
-      DB_PASS: cacti
-      DB_ROOT_PASS: example
-      INITIALIZE_DB: 1
-      TZ: Pacific/Auckland
-    ports:
-      - "80:80"
+      - cacti # the backup is an exec on the cacti container, so it must be running
+    group_add:
+      - 233 # add the docker group so that the container uid (1000) can exec docker
     volumes:
-      - /srv/cacti-data:/cacti
-      - /srv/cacti-spine:/spine
-      - /srv/cacti-backups:/backups
-
+      - /usr/bin/docker:/usr/bin/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock # Mount Docker socket for docker exec
+      - /srv/crontab:/etc/crontab
+    command:  -passthrough-logs /etc/crontab

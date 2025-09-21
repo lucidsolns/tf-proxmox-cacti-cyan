@@ -67,6 +67,21 @@ storage:
       contents:
         local: docker-compose.yaml
 
+    # write the initial passwords to an environment file that will be provided to docker compose
+    - path: /etc/docker-compose.env
+      mode: 0400
+      contents:
+        inline: |
+          DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+          DB_CACTI_PASSWORD=${DB_CACTI_PASSWORD}
+
+    # This is the crontab file for the supercronic workload. Add entries as
+    # required and ensure dependencies are expressed.
+    - path: /srv/crontab
+      overwrite: true
+      contents:
+        local: crontab
+
 
     - path: /etc/systemd/network/10-eth0.network
       contents:
@@ -83,23 +98,43 @@ storage:
       contents:
         local: sshd_config
 
+    # Download the 'docker-compose' sysext. It is important to note that the
+    # download will require network connectivity (which won't have been setup
+    # at this stage as the networkd file won't have been written, so the network
+    # will either need to get an address via DHCP, or a kernel command line configuration.
+    #
+    # see:
+    #  - https://flatcar.github.io/sysext-bakery/docker_compose/
+    #  - https://flatcar.github.io/sysext-bakery/
+    #  - https://www.flatcar.org/docs/latest/provisioning/ignition/network-configuration/
+    - path: /opt/extensions/docker-compose/docker-compose-2.34.0-x86-64.raw
+      mode: 0644
+      contents:
+        source: https://extensions.flatcar.org/extensions/docker-compose-2.34.0-x86-64.raw
+
+  links:
+    - target: /opt/extensions/docker-compose/docker-compose-2.34.0-x86-64.raw
+      path: /etc/extensions/docker-compose.raw
+      hard: false
+
   directories:
     - path: /srv/cacti-data
       user:
         name: cacti
       group:
         name: cacti
+
     - path: /srv/cacti-spine
       user:
         name: cacti
       group:
         name: cacti
+
     - path: /srv/cacti-backups
       user:
         name: cacti
       group:
         name: cacti
-
 
     - path: /srv/db
       user:
@@ -109,13 +144,7 @@ storage:
 
 systemd:
   units:
-
-    - name: docker-compose-install.service
-      enabled: true
-      contents_local: docker-compose-install.service
-
-
-      # cacti
+    # cacti
     - name: cacti.service
       enabled: true
       contents_local: cacti.service
