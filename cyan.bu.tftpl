@@ -151,7 +151,6 @@ storage:
 
 systemd:
   units:
-    # cacti
-    - name: cacti.service
+    - name: docker-compose.service
       enabled: true
-      contents_local: cacti.service
+      contents_local: docker-compose.service
