@@ -34,6 +34,7 @@ module "cacti" {
   butane_variables = {
     DB_ROOT_PASSWORD  = random_password.db_root_password.result
     DB_CACTI_PASSWORD = random_password.db_cacti_password.result
+    DOZZLE_USERS_YAML_URI   = module.dozzle_users.yaml_data_uri
   }
 
   storage_images = var.storage_images
@@ -53,9 +54,29 @@ module "cacti" {
   ]
 }
 
+/*
+   Create a simple logging service with dozzle. This isn't persistent logging.
+
+   see:
+     - https://github.com/lucidsolns/tf-proxmox-verdant-uptime-kuma/tree/main/dozzle
+*/
+module dozzle_users {
+  source = "git::https://github.com/lucidsolns/tf-proxmox-verdant-uptime-kuma.git//dozzle?ref=main"
+}
 
 /*
-  Generate a random password to be used for the 'owncloud' user for the db server
+  Generate a random password to be used for the 'owncloud' user for the db server. This
+  user is setup by MariaDB upon first boot only, and stored in the cacti data
+  `/include/config.php` file and in the spine `etc/spine.conf` file.
+
+  Updating the DB container password:
+      docker exec -it db mariadb -u root -p
+          <enter the root password when prompted>
+      SET PASSWORD FOR 'cacti'@'%' = PASSWORD('cleartext password');
+      FLUSH PRIVILEGES;
+
+  To get the cacti password:
+      terraform output db_cacti_password
 */
 resource "random_password" "db_cacti_password" {
   length  = 32    # number of characters

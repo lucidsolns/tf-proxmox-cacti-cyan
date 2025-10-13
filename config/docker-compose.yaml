@@ -78,6 +78,7 @@ services:
       - --innodb_large_prefix=1
       - --innodb_io_capacity=5000
       - --innodb_io_capacity_max=10000
+      - --innodb_force_recovery=0
 
   # Run the cacti backup as a cron job
   #
@@ -98,3 +99,37 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock # Mount Docker socket for docker exec
       - /srv/crontab:/etc/crontab
     command:  -passthrough-logs /etc/crontab
+
+  # Auto upgrade with watchtower
+  #
+  # see:
+  #   - https://github.com/containrrr/watchtower/tree/main
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 300
+
+  # Expose the docker logs on port 8080 with dozzle
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /srv/dozzle:/data
+    ports:
+      - 8080:8080
+    environment:
+      # Uncomment to enable container actions (stop, start, restart). See https://dozzle.dev/guide/actions
+      - DOZZLE_ENABLE_ACTIONS=true
+
+      # Uncomment to allow access to container shells. See https://dozzle.dev/guide/shell
+      - DOZZLE_ENABLE_SHELL=true
+
+      # Use simple authentication. The terraform will provision /srv/dozzle/users.yaml, and the whole
+      # dozzle directory can be added to the container.
+      #
+      # See:
+      #   - https://dozzle.dev/guide/authentication
+      - DOZZLE_AUTH_PROVIDER=simple

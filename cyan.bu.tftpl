@@ -75,6 +75,11 @@ storage:
           DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
           DB_CACTI_PASSWORD=${DB_CACTI_PASSWORD}
 
+    - path: /srv/dozzle/users.yaml
+      overwrite: true
+      contents:
+        source: ${DOZZLE_USERS_YAML_URI}
+
     # This is the crontab file for the supercronic workload. Add entries as
     # required and ensure dependencies are expressed.
     - path: /srv/crontab
@@ -118,6 +123,8 @@ storage:
       hard: false
 
   directories:
+    - path: /srv/dozzle
+
     - path: /srv/cacti-data
       user:
         name: cacti
