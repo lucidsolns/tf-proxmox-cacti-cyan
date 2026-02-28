@@ -154,3 +154,10 @@ systemd:
     - name: docker-compose.service
       enabled: true
       contents_local: docker-compose.service
+
+    - name: docker-cleanup.service
+      contents_local: docker-cleanup.service
+
+    - name: docker-cleanup.timer
+      enabled: true
+      contents_local: docker-cleanup.timer

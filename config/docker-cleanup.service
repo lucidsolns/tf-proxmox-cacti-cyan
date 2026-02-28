@@ -1,0 +1,20 @@
+[Unit]
+Description=Deep Docker Cleanup
+# Ensure it only runs if Docker is actually up
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+# -a: Remove all unused images, not just dangling ones
+# -f: Do not prompt for confirmation
+# --volumes: Prune unused volumes (where data bloat hides)
+ExecStart=/usr/bin/docker system prune -af --volumes
+# Also clean up the build cache specifically
+ExecStart=/usr/bin/docker builder prune -af
+
+# Lower priority so it doesn't starve running apps of I/O
+Nice=19
+CPUSchedulingPolicy=idle
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

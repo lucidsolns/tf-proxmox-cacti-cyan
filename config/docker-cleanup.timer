@@ -1,0 +1,12 @@
+[Unit]
+Description=Run Deep Docker Cleanup Weekly
+
+[Timer]
+# Run at 3:00 AM every Sunday
+OnCalendar=Sun *-*-* 03:00:00
+# Spread the load if you have multiple nodes
+RandomizedDelaySec=30m
+Persistent=true
+
+[Install]
+WantedBy=timers.target
